@@ -16,12 +16,13 @@ module w90_wan_ham
   !! This module contain operations on the Hamiltonian in the WF basis
 
   use w90_constants, only: dp
+  use w90_io, only: io_error, stdout, io_stopwatch, io_file_unit, seedname, io_stopwatch
 
   implicit none
 
   private
 
-  public :: wham_get_D_h, wham_get_eig_deleig, wham_get_eig_deleig_TB_conv, wham_get_D_h_P_value
+  public :: wham_get_D_h, wham_get_eig_deleig, wham_get_eig_deleig_p, wham_get_eig_deleig_TB_conv, wham_get_D_h_P_value
   public :: wham_get_occ_mat_list, wham_get_eig_UU_HH_JJlist
   public :: wham_get_eig_UU_HH_AA_sc, wham_get_eig_UU_HH_AA_sc_TB_conv
 
@@ -390,6 +391,7 @@ contains
     use w90_postw90_common, only: pw90common_fourier_R_to_k
     use w90_utility, only: utility_diagonalize
 
+
     real(kind=dp), dimension(3), intent(in)         :: kpt
     !! the three coordinates of the k point vector (in relative coordinates)
     real(kind=dp), intent(out)                      :: eig(num_wann)
@@ -403,6 +405,7 @@ contains
     !! the delHH matrix (derivative of H) at kpt
     complex(kind=dp), dimension(:, :), intent(out)   :: UU
     !! the rotation matrix that gives the eigenvectors of HH
+    integer                                         :: delHHdat_unit, i, enidx, ibnd, jbnd, ipol, num_kpts
 
     ! I call it to be sure that it has been called already once,
     ! and that HH_R contains the actual matrix.
@@ -414,11 +417,75 @@ contains
     call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 1), 1)
     call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 2), 2)
     call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 3), 3)
+
+    call wham_get_deleig_a(del_eig(:, 1), eig, delHH(:, :, 1), UU)
+    call wham_get_deleig_a(del_eig(:, 2), eig, delHH(:, :, 2), UU)
+    call wham_get_deleig_a(del_eig(:, 3), eig, delHH(:, :, 3), UU)
+!--------------------------------------------------------------------------------------------
+  end subroutine wham_get_eig_deleig
+
+
+subroutine wham_get_eig_deleig_p(kpt, eig, del_eig, HH, delHH, UU, delHHdat_unit)
+    !! Given a k point, this function returns eigenvalues E and
+    !! derivatives of the eigenvalues dE/dk_a, using wham_get_deleig_a
+    !
+    use w90_parameters, only: num_wann
+    use w90_get_oper, only: HH_R, get_HH_R
+    use w90_postw90_common, only: pw90common_fourier_R_to_k
+    use w90_utility, only: utility_diagonalize
+
+
+    real(kind=dp), dimension(3), intent(in)         :: kpt
+    !! the three coordinates of the k point vector (in relative coordinates)
+    real(kind=dp), intent(out)                      :: eig(num_wann)
+    !! the calculated eigenvalues at kpt
+    real(kind=dp), intent(out)                      :: del_eig(num_wann, 3)
+    !! the calculated derivatives of the eigenvalues at kpt [first component: band; second component: 1,2,3
+    !! for the derivatives along the three k directions]
+    complex(kind=dp), dimension(:, :), intent(out)   :: HH
+    !! the Hamiltonian matrix at kpt
+    complex(kind=dp), dimension(:, :, :), intent(out) :: delHH
+    !! the delHH matrix (derivative of H) at kpt
+    complex(kind=dp), dimension(:, :), intent(out)   :: UU
+    !! the rotation matrix that gives the eigenvectors of HH
+    integer                                         :: delHHdat_unit, i, enidx, ibnd, jbnd, ipol, num_kpts
+
+    ! I call it to be sure that it has been called already once,
+    ! and that HH_R contains the actual matrix.
+    ! Further calls should return very fast.
+    call get_HH_R
+
+    call pw90common_fourier_R_to_k(kpt, HH_R, HH, 0)
+    call utility_diagonalize(HH, num_wann, eig, UU)
+    call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 1), 1)
+    call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 2), 2)
+    call pw90common_fourier_R_to_k(kpt, HH_R, delHH(:, :, 3), 3)
+
     call wham_get_deleig_a(del_eig(:, 1), eig, delHH(:, :, 1), UU)
     call wham_get_deleig_a(del_eig(:, 2), eig, delHH(:, :, 2), UU)
     call wham_get_deleig_a(del_eig(:, 3), eig, delHH(:, :, 3), UU)
 
-  end subroutine wham_get_eig_deleig
+    ! Added by Eleni - add to else if geninterp_single_file == false
+    ! -------------------------------------------------------------------------------------
+    ! Eleni: Adding code to print delHH
+    ! Be sure to delete this afterwards because it will print nonsense if
+    ! variable geninterp_alsofirstder is not set
+    ! Now the printing, only on root node
+    !if (on_root) then
+
+    !if (geninterp_alsofirstder) then
+    write (delHHdat_unit, '(i3)') i
+    do ipol=1,3
+        write (delHHdat_unit, '(i3)') ipol
+        do enidx = 1, num_wann
+            write (delHHdat_unit, '(5f15.8)') &
+            (abs(delHH(enidx,jbnd,ipol))**2, jbnd=1, num_wann)
+        enddo
+    enddo
+    !end if
+
+!-------------------------------------------------------------------------------------------
+  end subroutine wham_get_eig_deleig_p
 
   subroutine wham_get_eig_deleig_TB_conv(kpt, eig, del_eig, delHH, UU)
     ! modified version of wham_get_eig_deleig for the TB convention

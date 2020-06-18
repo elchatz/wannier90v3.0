@@ -30,7 +30,7 @@ module w90_geninterp
   use w90_comms
   use w90_utility, only: utility_diagonalize
   use w90_postw90_common, only: pw90common_fourier_R_to_k
-  use w90_wan_ham, only: wham_get_eig_deleig
+  use w90_wan_ham, only: wham_get_eig_deleig_p
   use w90_io, only: io_date
   implicit none
 
@@ -70,7 +70,7 @@ contains
     !! But at least if works independently of the number of processors.
     !! I think that a way to write in parallel to the output would help a lot,
     !! so that we don't have to send all eigenvalues to the root node.
-    integer            :: kpt_unit, outdat_unit, num_kpts, ierr, i, j, k, enidx
+    integer            :: kpt_unit, outdat_unit, delHHdat_unit, num_kpts, ierr, i, j, k, enidx, ibnd, jbnd, ipol
     character(len=500) :: commentline
     character(len=50)  :: cdum
     integer, dimension(:), allocatable              :: kpointidx, localkpointidx
@@ -84,7 +84,7 @@ contains
     real(kind=dp), dimension(:, :), allocatable      :: localeig
     real(kind=dp), dimension(:, :), allocatable      :: globaleig
     logical                                         :: absoluteCoords
-    character(len=200)                              :: outdat_filename
+    character(len=200)                              :: outdat_filename, delHHdat_filename
 
     integer, dimension(0:num_nodes - 1)               :: counts
     integer, dimension(0:num_nodes - 1)               :: displs
@@ -204,6 +204,7 @@ contains
     end if
 
     ! I open the output file(s)
+    ! geninterp_single_file: Write a single file or one for each process - default: true
     if (geninterp_single_file) then
       if (on_root) then
         outdat_filename = trim(seedname)//'_geninterp.dat'
@@ -211,6 +212,12 @@ contains
         open (unit=outdat_unit, file=trim(outdat_filename), form='formatted', err=107)
 
         call internal_write_header(outdat_unit, commentline)
+
+        ! Added by Eleni - add to else if geninterp_single_file == false
+        delHHdat_filename = trim(seedname)//'_delHH.dat'
+        delHHdat_unit = io_file_unit()
+        open (unit=delHHdat_unit, file=trim(delHHdat_filename), form='formatted', err=108)
+
       end if
     else
       if (num_nodes > 99999) then
@@ -231,7 +238,7 @@ contains
       kpt = localkpoints(:, i)
       ! Here I get the band energies and the velocities (if required)
       if (geninterp_alsofirstder) then
-        call wham_get_eig_deleig(kpt, localeig(:, i), localdeleig(:, :, i), HH, delHH, UU)
+        call wham_get_eig_deleig_p(kpt, localeig(:, i), localdeleig(:, :, i), HH, delHH, UU, delHHdat_unit)
       else
         call pw90common_fourier_R_to_k(kpt, HH_R, HH, 0)
         call utility_diagonalize(HH, num_wann, localeig(:, i), UU)
@@ -258,7 +265,7 @@ contains
             frac(j) = recip_lattice(1, j)*kpt(1) + recip_lattice(2, j)*kpt(2) + recip_lattice(3, j)*kpt(3)
           end do
 
-          ! I print each line
+          ! I print each line (energies and derivatives)
           if (geninterp_alsofirstder) then
             do enidx = 1, num_wann
               write (outdat_unit, '(I10,7G18.10)') kpointidx(i), frac, &
@@ -269,8 +276,23 @@ contains
               write (outdat_unit, '(I10,4G18.10)') kpointidx(i), frac, globaleig(enidx, i)
             end do
           end if
+
+        !if (geninterp_alsofirstder) then
+        !    write (delHHdat_unit, '(i3)') kpointidx(i)
+        !    do ipol=1,3
+        !        write (delHHdat_unit, '(i3)') ipol
+        !        do enidx = 1, num_wann
+        !            write (delHHdat_unit, '(5f15.8)') &
+        !               (delHH(enidx,1,ipol))
+        !        enddo
+        !    enddo
+        !end if
+
+        ! end loop for k-points
         end do
-        close (outdat_unit)
+        !close (outdat_unit)
+        !close(delHHdat_unit)
+      !end if on root
       end if
     else
       ! Each node simply writes to its own file
@@ -293,8 +315,23 @@ contains
             write (outdat_unit, '(I10,4G18.10)') localkpointidx(i), frac, localeig(enidx, i)
           end do
         end if
+
+        !if (geninterp_alsofirstder) then
+        !    write (delHHdat_unit, '(i3)') kpointidx(i)
+        !    do ipol=1,3
+        !        write (delHHdat_unit, '(i3)') ipol
+        !        do enidx = 1, num_wann
+        !            write (delHHdat_unit, '(5f15.8)') (delHH(enidx,1,ipol))
+        !               ! (delHH(enidx,jbnd,ipol), jbnd=1, num_wann)
+        !        enddo
+        !    enddo
+        !end if
+
+      !end k-points loop
       end do
       close (outdat_unit)
+      close(delHHdat_unit)
+    ! end if on many processors
     end if
 
     ! All k points processed: Final processing/deallocations
@@ -320,9 +357,10 @@ contains
 
     return
 
-105 call io_error('Error: Problem opening k-point file '//trim(seedname)//'_geninterp.kpt')
-106 call io_error('Error: Problem reading k-point file '//trim(seedname)//'_geninterp.kpt')
+105 call io_error('Error: Problem opening k-point file '//trim(seedname)//'_geninterp.kpt 106')
+106 call io_error('Error: Problem reading k-point file '//trim(seedname)//'_geninterp.kpt 105')
 107 call io_error('Error: Problem opening output file '//trim(outdat_filename))
+108 call io_error('Error: Problem opening output file '//trim(delHHdat_filename))
   end subroutine geninterp_main
 
 end module w90_geninterp
