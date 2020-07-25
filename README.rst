@@ -1,3 +1,17 @@
+Important: This is a special version of the software that can print out the velocity matrix elements of the Hamiltonian. To get the original version of the software, visit the website at 
+
+http://www.wannier.org/
+
+If, however, you use this version for its functionality, remember to also cite:
+
+E. Chatzikyriakou, J. Kioseoglou, “Emergence of valley selectivity in monolayer tin (ii) sulphide”, RSC Nanoscale advances”, RSC Nanoscale Advances 2019, doi: 10.1039/C9NA00555B
+
+
+
+
+
+
+
 =========
 Wannier90
 =========
