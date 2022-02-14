@@ -1,4 +1,23 @@
-=========
+Important: This is a modified version of the Wanier90 code to print out the momentum matrix elements. To get the original version, visit http://www.wannier.org.
+
+Do not substitute your version of Wannier90 with this, because it does not work properly if the variables mentioned below are not set.
+
+When using this version you need to define: 
+
+geninterp=.true.
+geninterp_alsofirstder=.true.
+
+in the input file. 
+
+If you use this version, please consider citing:
+
+E. Chatzikyriakou, J. Kioseoglou, “Emergence of valley selectivity in monolayer tin (ii) sulphide”, RSC Nanoscale advances”, RSC Nanoscale Advances 2019, doi: 10.1039/C9NA00555B
+
+You can find a note on the units in the forum:
+
+https://lists.quantum-espresso.org/pipermail/wannier/2020-March/001739.html
+
+=========================================================================================================================================================
 Wannier90
 =========
 
