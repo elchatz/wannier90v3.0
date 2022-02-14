@@ -1,17 +1,3 @@
-Important: This is a special version of the software that can print out the velocity matrix elements of the Hamiltonian. To get the original version of the software, visit the website at 
-
-http://www.wannier.org/
-
-If, however, you use this version for its functionality, remember to also cite:
-
-E. Chatzikyriakou, J. Kioseoglou, “Emergence of valley selectivity in monolayer tin (ii) sulphide”, RSC Nanoscale advances”, RSC Nanoscale Advances 2019, doi: 10.1039/C9NA00555B
-
-
-
-
-
-
-
 =========
 Wannier90
 =========
@@ -42,25 +28,13 @@ How to cite
 +++++++++++
 Please cite the following paper in any publications arising from the use of 
 this code:
-
-  G. Pizzi, V. Vitale, R. Arita, S. Blügel, F. Freimuth, G. Géranton, M. Gibertini, 
-  D. Gresch, C. Johnson, T. Koretsune, J Ibañez-Azpiroz, H. Lee, J.M. Lihm, 
-  D. Marchand, A. Marrazzo, Y. Mokrousov, J.I. Mustafa, Y. Nohara, Y. Nomura, 
-  L. Paulatto, S. Poncé, T. Ponweiser, J. Qiao, F. Thöle, S.S. Tsirkin, 
-  M. Wierzbowska, N. Marzari, D. Vanderbilt, I. Souza, A.A. Mostofi, J.R. Yates, 
-  Wannier90 as a community code: new features and applications, 
-  `J. Phys. Cond. Matt. 32, 165902`_ (2020)
-
-.. _J. Phys. Cond. Matt. 32, 165902: https://doi.org/10.1088/1361-648X/ab51ff
-
-If you are using versions 2.x of the code, cite instead:
                                                          
   A.A. Mostofi, J.R. Yates, G. Pizzi, Y.S. Lee, I. Souza, 
   D Vanderbilt, N Marzari, *An updated version of wannier90: A tool for 
   obtaining maximally-localised Wannier functions*, 
   `Comput. Phys. Commun. 185, 2309 (2014)`_ 
 
-.. _Comput. Phys. Commun. 185, 2309 (2014): http://doi.org/10.1016/j.cpc.2014.05.003
+.. _Comput. Phys. Commun. 185, 2309 (2014): http://dx.doi.org/10.1016/j.cpc.2014.05.003
 
 For the method please cite:
 
@@ -121,7 +95,6 @@ In addition to the Wannier90 Developer Group, the other authors of Wannier90 v.3
 * Takashi Koretsune (Tohoku University and JST PRESTO, JP): Symmetry-adapted Wannier functions, non-collinear spin with ultrasoft in pw2wannier90
 * Julen Ibañez-Azpiroz (Universidad del Pais Vasco, ES): shift-current calculation
 * Hyungjun Lee (EPFL, CH): Spinor-valued WFs, parallelisation of the core Wannier90 routines
-* Jae-Mo Lihm (Seoul National University, KR): SCDM-k implementation for non-collinear spin in pw2wannier90
 * Daniel Marchand (EPFL, CH): AiiDA-Wannier90 interface
 * Antimo Marrazzo (EPFL, CH): GW bands interpolation, AiiDA-Wannier90 interface
 * Yuriy Mokrousov (FZ  Jülich, DE): Parallelization of the core routines
@@ -184,7 +157,7 @@ Wannier90 Version 1.0 was written by:
 * Jonathan R. Yates  (University of Oxford, GB)
 * Young-Su Lee       (KIST, KR)
 
-Wannier90 is based on the [Wannier Fortran 77 code](http://www.wannier.org/history/) by:
+Wannier90 is based on Fortran 77 codes written by:
 
 * Nicola Marzari (EPFL, CH)
 * Ivo Souza (Universidad del Pais Vasco, ES)

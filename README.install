@@ -48,7 +48,6 @@
                    the user guide)
    make w90vdw     build the van der Waals code
    make w90pov     build the ray-tracing code
-   make install    install the built binaries
    make tests      run test cases
    make doc        build the documentation
    make dist       make a tar-ball of the distribution
@@ -58,11 +57,6 @@
 
  'make -j NN' will allow compilation using NN multiple threads.
  On a multicore CPU this will build the executables in a shorter time.
-
- 'make install' supports DESTDIR and PREFIX variables.
- Executables will be installed into $(DESTDIR)$(PREFIX)/bin directory,
- libraries will be installed into $(DESTDIR)$(PREFIX)/lib directory.
- The default DESTDIR is empty, and the default PREFIX is /usr.
 
  In order to compile the postw90.x executable in its parallel version, you have
  to specify 
@@ -84,7 +78,7 @@
   LAPACK can be obtained from the netlib website. It also includes a 
   non-optimised BLAS.
      http://www.netlib.org/lapack/
-
+     
 
 Linux x86,x86-64
 ----------------
